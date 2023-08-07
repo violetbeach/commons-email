@@ -270,15 +270,9 @@ public class MimeMessageParser
         final DataHandler dataHandler = part.getDataHandler();
         final DataSource dataSource = dataHandler.getDataSource();
         final String contentType = getBaseMimeType(dataSource.getContentType());
-        byte[] content;
-        try (InputStream inputStream = dataSource.getInputStream()) 
-        {
-            content = this.getContent(inputStream);
-        }
-        final ByteArrayDataSource result = new ByteArrayDataSource(content, contentType);
-        final String dataSourceName = getDataSourceName(part, dataSource);
-        result.setName(dataSourceName);
-        return result;
+		final String dataSourceName = getDataSourceName(part, dataSource);
+
+		return new AttachmentDataSource(dataSource.getInputStream(), contentType, dataSourceName);
     }
 
     /** @return Returns the mimeMessage. */
@@ -408,29 +402,6 @@ public class MimeMessageParser
         }
 
         return result;
-    }
-
-    /**
-     * Read the content of the input stream.
-     *
-     * @param is the input stream to process
-     * @return the content of the input stream
-     * @throws IOException reading the input stream failed
-     */
-    private byte[] getContent(final InputStream is)
-        throws IOException
-    {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        final BufferedInputStream isReader = new BufferedInputStream(is);
-        try (BufferedOutputStream osWriter = new BufferedOutputStream(os)) {
-            int ch;
-            while ((ch = isReader.read()) != -1)
-            {
-                osWriter.write(ch);
-            }
-            osWriter.flush();
-            return os.toByteArray();
-        }
     }
 
     /**
